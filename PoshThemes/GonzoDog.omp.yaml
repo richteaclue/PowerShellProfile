@@ -6,80 +6,86 @@ blocks:
 - type: prompt
   alignment: left
   segments:
-    - type: os
-      style: plain
-      template: ' {{ if .WSL }}WSL at {{ end }}{{.Icon}} '
-      background: '#546E7A'
-      foreground: '#26C6DA'      
+  - type: os
+    style: plain
+    template: ' {{ if .WSL }}WSL at {{ end }}{{.Icon}} '
+    background: '#546E7A'
+    foreground: '#26C6DA'      
 
-    - type: root
-      style: powerline
-      template: '  '
-      powerline_symbol: 
-      properties:
-        root_icon: 
-      background: '#546E7A'
-      foreground: '#26C6DA'
+  - type: root
+    style: powerline
+    template: '  '
+    powerline_symbol: 
+    properties:
+      root_icon: 
+    background: '#546E7A'
+    foreground: '#26C6DA'
 
-    - type: path
-      style: plain
-      template: ' {{ .Path }} '
-      properties:
-        style: mixed
-      background: '#546E7A'
-      foreground: '#26C6DA'
-      
-    - type: git
-      style: plain
-      template: '<#26C6DA> </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}}  {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} '
-      background: '#546E7A'
-      foreground: '#D4E157'      
+  - type: path
+    style: plain
+    template: ' {{ .Path }} '
+    properties:
+      style: mixed
+    background: '#546E7A'
+    foreground: '#26C6DA'
+    
+  - type: git
+    style: plain
+    template: '<#26C6DA> </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}}  {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} '
+    background: '#546E7A'
+    foreground: '#D4E157'      
 
-    - type: text
-      style: plain
-      template: 
-      background: transparent
-      foreground: '#546E7A'      
+  - type: text
+    style: plain
+    template: 
+    background: transparent
+    foreground: '#546E7A'      
 
 - type: prompt
   alignment: right
   segments:
-    - type: exit
-      style: diamond
-      template: '<#193549></> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA></> '
-      leading_diamond: 
-      properties:
-        always_enabled: true
-        display_exit_code: true
-      background: '#546E7A'
-      foreground: '#D4E157'
-      foreground_templates:
-        - '{{ if gt .Code 0 }}#FF5252{{ end }}'
-      
-    - type: executiontime
-      style: diamond
-      template: ' <#fefefe>ﮫ</> {{ .FormattedMs }} <#26C6DA></> '
-      properties:
-        style: austin
-        threshold: 500
-      background: '#546E7A'
-      foreground: '#D4E157'
-      
-    - type: dotnet
-      style: diamond
-      template: ' {{ if .Unsupported }}{{ else }}{{ .Full }}{{ end }} <#26C6DA></> '
-      properties:
-        display_mode: files
-      background: '#546E7A'
-      foreground: '#D4E157'
-      
-    # - type: time
-    #   style: plain
-    #   template: ' {{ .CurrentDate | date .Format }}  '
-    #   properties:
-    #     time_format: "15:04:05"
-    #   background: '#546E7A'
-    #   foreground: '#D4E157'
+  - type: exit
+    style: diamond
+    template: '<#193549></> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA></> '
+    leading_diamond: 
+    properties:
+      always_enabled: true
+      display_exit_code: true
+    background: '#546E7A'
+    foreground: '#D4E157'
+    foreground_templates:
+      - '{{ if gt .Code 0 }}#FF5252{{ end }}'
+
+  - type: executiontime
+    style: diamond
+    template: ' <#fefefe>ﮫ</> {{ .FormattedMs }} <#26C6DA></> '
+    properties:
+      style: austin
+      threshold: 500
+    background: '#546E7A'
+    foreground: '#D4E157'
+
+  - type: python
+    style: powerline
+    foreground: '#D4E157'
+    background: '#546E7A'
+    template: ' {{ if .Error }}{{ .Error }}{{ else }} {{ if .Venv }}{{ .Venv }}{{ else }}{{ .Full }}{{ end }}{{ end }} '
+
+  - type: dotnet
+    style: diamond
+    template: ' {{ if .Unsupported }}{{ else }}{{ .Full }}{{ end }} <#26C6DA></> '
+    properties:
+      display_mode: files
+    background: '#546E7A'
+    foreground: '#D4E157'
+    
+  # - type: time
+  #   style: plain
+  #   template: ' {{ .CurrentDate | date .Format }}  '
+  #   properties:
+  #     time_format: "15:04:05"
+  #   background: '#546E7A'
+  #   foreground: '#D4E157'
 
 - type: prompt
   alignment: left

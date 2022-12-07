@@ -33,5 +33,7 @@ Import-Module ZLocation
 #     $env:PATH = $env:PATH + ";" + $path
 # }
 
+# Disable the Python virtual environment prompt in poetry shell (info is handled by OMP)
+$env:VIRTUAL_ENV_DISABLE_PROMPT=1
 
 
