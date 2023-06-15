@@ -28,4 +28,4 @@ Set-PSReadLineOption -Colors $colors
 # Assumes posh-git module is installed & imported
 
 $env:POSH_SESSION_DEFAULT_USER = 'Rich.Tebb'
-oh-my-posh init pwsh --config '~/Documents/PowerShell/PoshThemes/GonzoDog.omp.yaml' | Invoke-Expression
+oh-my-posh --init --shell pwsh --config '~/Documents/PowerShell/PoshThemes/GonzoDog.omp.yaml' | Invoke-Expression

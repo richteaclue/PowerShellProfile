@@ -2,7 +2,7 @@
 Common profile for all terminal environments.
 #>
 
-# Import-Module posh-git > $null
+Import-Module posh-git > $null
 
 
 # Misc scripts
@@ -12,10 +12,9 @@ Common profile for all terminal environments.
 
 
 # Currently a rendering issue in VSCode Integrated Host with oh-my-posh
-if (($PSVersionTable.PSEdition -eq 'Core') -and ($Host.Name -ne 'Visual Studio Code Host')) {
-  . "$PSScriptRoot\OhMyPosh.ps1"
+if ($env:TERM_PROGRAM -eq 'vscode') {
+  . "$PSScriptRoot\PoshGitPrompt.ps1"
 } else {
-  # . "$PSScriptRoot\PoshGitPrompt.ps1"
   . "$PSScriptRoot\OhMyPosh.ps1"
 }
 
@@ -27,13 +26,8 @@ if (($PSVersionTable.PSEdition -eq 'Core') -and ($Host.Name -ne 'Visual Studio C
 Import-Module ZLocation
 
 # Path modifications
-# $path = "C:\Users\rich\AppData\Roaming\Python\Python37\Scripts"
-# if (Test-Path $path)
-# {
-#     $env:PATH = $env:PATH + ";" + $path
-# }
 
-# Disable the Python virtual environment prompt in poetry shell (info is handled by OMP)
+# Disable the Python virtual environment prompt in poetry shell (the info is displayed by oh-my-posh instead)
 $env:VIRTUAL_ENV_DISABLE_PROMPT=1
 
 
