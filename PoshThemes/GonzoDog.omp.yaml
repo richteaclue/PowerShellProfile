@@ -2,6 +2,7 @@
 
 version: 2
 console_title_template: "{{.Folder}}"
+pwd: osc99
 blocks:
 - type: prompt
   alignment: left
