@@ -11,11 +11,13 @@ Import-Module posh-git > $null
 . "$PSScriptRoot\Alias.ps1"
 
 
-# Currently a rendering issue in VSCode Integrated Host with oh-my-posh
-if ($env:TERM_PROGRAM -eq 'vscode') {
-  . "$PSScriptRoot\PoshGitPrompt.ps1"
-} else {
+if (Test-Path env:WT_SESSION) {
+  # Windows Terminal
   . "$PSScriptRoot\OhMyPosh.ps1"
+} elseif ( $env:TERM_PROGRAM -eq 'vscode') {
+  # VS Code
+  # Currently a rendering issue in VSCode Integrated Host with oh-my-posh
+. "$PSScriptRoot\PoshGitPrompt.ps1"
 }
 
 # Need to install / import ZLocation *after* any prompt scripts
