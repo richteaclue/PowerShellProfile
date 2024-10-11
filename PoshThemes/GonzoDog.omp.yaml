@@ -45,7 +45,7 @@ blocks:
 - type: prompt
   alignment: right
   segments:
-  - type: exit
+  - type: status
     style: diamond
     template: '<#193549></> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA></> '
     leading_diamond: 
@@ -97,9 +97,9 @@ blocks:
         - '{{ if gt .Code 0 }}#FF5252{{ end }}'
       properties:
         always_enabled: true
-      style: plain
-      template: '❯ '
-      type: exit
+      style: diamond
+      template: '{{ if gt .Code 0 }}✘{{ .Code }}{{ else }}✔{{ end }} ❯ '
+      type: status
 
 tooltips:
   - type: az
