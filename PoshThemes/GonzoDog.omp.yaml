@@ -1,113 +1,95 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
 
-version: 2
 console_title_template: "{{.Folder}}"
 pwd: osc99
 blocks:
 - type: prompt
   alignment: left
   segments:
-  - type: os
-    style: plain
-    template: ' {{ if .WSL }}WSL at {{ end }}{{.Icon}} '
-    background: '#546E7A'
-    foreground: '#26C6DA'      
-
-  - type: root
-    style: powerline
-    template: '  '
-    powerline_symbol: 
-    properties:
+  - style: plain
+    template: " {{ if .WSL }}WSL at {{ end }}{{.Icon}} \ue0b1"
+    foreground: "#26C6DA"
+    background: "#546E7A"
+    type: os
+  - properties:
       root_icon: 
-    background: '#546E7A'
-    foreground: '#26C6DA'
-
-  - type: path
-    style: plain
-    template: ' {{ .Path }} '
-    properties:
+    style: powerline
+    template: " \uf0e7 "
+    foreground: "#26C6DA"
+    powerline_symbol: 
+    background: "#546E7A"
+    type: root
+  - properties:
       style: mixed
-    background: '#546E7A'
-    foreground: '#26C6DA'
-    
-  - type: git
     style: plain
-    template: '<#26C6DA> </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}}  {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}}  {{ .WorktreeCount }}{{ end }} '
-    background: '#546E7A'
-    foreground: '#D4E157'      
-
-  - type: text
-    style: plain
+    template: " {{ .Path }} "
+    foreground: "#26C6DA"
+    background: "#546E7A"
+    type: path
+  - style: plain
+    template: "<#26C6DA>\ue0b1 </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} \uf692 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}} \uf1bb {{ .WorktreeCount }}{{ end }} "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: git
+  - style: plain
     template: 
+    foreground: "#546E7A"
     background: transparent
-    foreground: '#546E7A'      
-
+    type: text
 - type: prompt
   alignment: right
   segments:
-  - type: status
-    style: diamond
-    template: '<#193549></> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA></> '
-    leading_diamond: 
-    properties:
+  - properties:
       always_enabled: true
       display_exit_code: true
-    background: '#546E7A'
-    foreground: '#D4E157'
-    foreground_templates:
-      - '{{ if gt .Code 0 }}#FF5252{{ end }}'
-
-  - type: executiontime
     style: diamond
-    template: ' <#fefefe>ﮫ</> {{ .FormattedMs }} <#26C6DA></> '
-    properties:
+    leading_diamond: 
+    template: "<#193549>\ue23a</> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA>\ue0b3</> "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: status
+    foreground_templates:
+    - "{{ if gt .Code 0 }}#FF5252{{ end }}"
+  - properties:
       style: austin
       threshold: 500
-    background: '#546E7A'
-    foreground: '#D4E157'
-
-  - type: python
-    style: powerline
-    foreground: '#D4E157'
-    background: '#546E7A'
-    template: ' {{ if .Error }}{{ .Error }}{{ else }} {{ if .Venv }}{{ .Venv }}{{ else }}{{ .Full }}{{ end }}{{ end }} '
-
-  - type: dotnet
     style: diamond
-    template: ' {{ if .Unsupported }}{{ else }}{{ .Full }}{{ end }} <#26C6DA></> '
-    properties:
+    template: " <#fefefe>ﮫ</> {{ .FormattedMs }} <#26C6DA>\ue0b3</> "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: executiontime
+  - style: powerline
+    template: " {{ if .Error }}{{ .Error }}{{ else }}\ue235 {{ if .Venv }}{{ .Venv }}{{ else }}{{ .Full }}{{ end }}{{ end }} "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: python
+  - properties:
       display_mode: files
-    background: '#546E7A'
-    foreground: '#D4E157'
-    
-  # - type: time
-  #   style: plain
-  #   template: ' {{ .CurrentDate | date .Format }}  '
-  #   properties:
-  #     time_format: "15:04:05"
-  #   background: '#546E7A'
-  #   foreground: '#D4E157'
-
+    style: diamond
+    template: "\ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }} <#26C6DA>\ue0b3</> "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: dotnet
 - type: prompt
   alignment: left
-  newline: true
   segments:
-    - foreground: '#D4E157'
-      foreground_templates:
-        - '{{ if gt .Code 0 }}#FF5252{{ end }}'
-      properties:
-        always_enabled: true
-      style: diamond
-      template: '{{ if gt .Code 0 }}✘{{ .Code }}{{ else }}✔{{ end }} ❯ '
-      type: status
-
+  - properties:
+      always_enabled: true
+    style: diamond
+    template: "{{ if gt .Code 0 }}✘{{ .Code }}{{ else }}✔{{ end }} ❯ "
+    foreground: "#D4E157"
+    type: status
+    foreground_templates:
+    - "{{ if gt .Code 0 }}#FF5252{{ end }}"
+  newline: true
 tooltips:
-  - type: az
-    tips:
-      - "az"
-    style: powerline
-    template: ' ﴃ {{ .Name }}'
-    properties:
-      source: cli
-    background: '#546E7A'
-    foreground: '#D4E157'
+- properties:
+    source: cli
+  style: powerline
+  template: " ﴃ {{ .Name }}"
+  foreground: "#D4E157"
+  background: "#546E7A"
+  type: az
+  tips:
+  - az
+version: 3
