@@ -32,4 +32,11 @@ Import-Module ZLocation
 # Disable the Python virtual environment prompt in poetry shell (the info is displayed by oh-my-posh instead)
 $env:VIRTUAL_ENV_DISABLE_PROMPT=1
 
-
+# Prevent adding to command history if the command starts with a space
+Set-PSReadLineOption -AddToHistoryHandler {
+  param($command)
+  if ($command -like ' *') {
+      return $false
+  }
+  return $true
+}
