@@ -31,7 +31,7 @@ $GitPromptSettings.AfterStatus.ForegroundColor = [ConsoleColor]::DarkYellow
 
 $GitPromptSettings.DefaultPromptSuffix = ' $(Get-PromptSuffix) '
 
-function Get-PromptSuffix {
+function Global:Get-PromptSuffix {
   $adminPrompt = ""
   $promptTerminator = ">"
   if ((Get-Command 'Test-Administrator') -and (Test-Administrator)) {
@@ -42,7 +42,7 @@ function Get-PromptSuffix {
   return $adminPrompt + $terminator
 }
 
-function Get-PathStringComparison {
+function Global:Get-PathStringComparison {
   # File system paths are case-sensitive on Linux and case-insensitive on Windows and macOS
   if (($PSVersionTable.PSVersion.Major -ge 6) -and $IsLinux) {
     [System.StringComparison]::Ordinal
@@ -51,7 +51,7 @@ function Get-PathStringComparison {
     [System.StringComparison]::OrdinalIgnoreCase
   }
 }
-function Get-ShortPromptPath {
+function Global:Get-ShortPromptPath {
   $pathInfo = $ExecutionContext.SessionState.Path.CurrentLocation
   $currentPath = if ($pathInfo.Drive) { $pathInfo.Path } else { $pathInfo.ProviderPath }
   $stringComparison = Get-PathStringComparison
