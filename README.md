@@ -2,21 +2,20 @@
 
 The following modules need to be installed:
 
-- ZLocation (>= 1.4.3)
-
 - PSReadLine (>= 2.2.6)
 
 - Microsoft.PowerShell.SecretManagement (>= 1.1.2)
 
-Also need to install [Oh My Posh](https://ohmyposh.dev/docs/installation/windows).
+Also need to install [Oh My Posh](https://ohmyposh.dev/docs/installation/windows) and .
 
 For example:
 
 ```ps
 Install-Module PSReadline
 Install-Module Microsoft.PowerShell.SecretManagement
-Install-Module ZLocation
-Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://ohmyposh.dev/install.ps1'))
+winget install JanDeDobbeleer.OhMyPosh --force
+winget install ajeetdsouza.zoxide --force
+winget install junegunn.fzf --force
 ```
 
 Once you have installed Oh My Posh, run

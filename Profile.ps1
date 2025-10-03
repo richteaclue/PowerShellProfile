@@ -61,10 +61,6 @@ $actions = @(
   },
   {
     Import-Module -Name Terminal-Icons -Global
-  },
-  {
-    # Dependency: https://github.com/ajeetdsouza/zoxide
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
   }
 )
 
@@ -94,6 +90,11 @@ if (Test-Path env:WT_SESSION) {
   }
 }
 
+$actions +=
+{
+  # Dependency: https://github.com/ajeetdsouza/zoxide
+  Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
 
 $__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
 $actions | ForEach-Object { $__initQueue.Enqueue($_) }
