@@ -45,10 +45,10 @@ $pgp = Get-Command (Join-Path $root "PoshGitPrompt.ps1") | Select-Object -Expand
 
 $actions = @(
   {
-    Import-Module posh-git
+    Import-Module posh-git -Global
   },
   {
-    Import-Module Microsoft.PowerShell.SecretManagement
+    Import-Module Microsoft.PowerShell.SecretManagement -Global
 
     # Secrets should be set with the Set-Secret command, e.g.
     # Set-Secret -Name MyStringToken
@@ -65,7 +65,9 @@ $actions = @(
 )
 
 if (Test-Path env:WT_SESSION) {
-  $actions += $omp
+  $actions += {
+    New-Module -ScriptBlock $omp | Import-Module -Global
+  }
 } elseif ( $env:TERM_PROGRAM -eq 'vscode') {
   # VS Code
   # Currently a rendering issue in VSCode Integrated Host with oh-my-posh, so we use Posh-Git prompt
@@ -90,10 +92,9 @@ if (Test-Path env:WT_SESSION) {
   }
 }
 
-$actions +=
-{
+$actions += {
   # Dependency: https://github.com/ajeetdsouza/zoxide
-  Invoke-Expression (& { (zoxide init powershell | Out-String) })
+  New-Module -ScriptBlock { Invoke-Expression (& { (zoxide init powershell | Out-String) }) } | Import-Module -Global
 }
 
 $__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
