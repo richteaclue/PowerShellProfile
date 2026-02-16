@@ -26,12 +26,6 @@ Set-PSReadLineOption -AddToHistoryHandler {
   return $true
 }
 
-# Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
-function prompt {
-  # We will override this prompt, however because it is loading async we want to communicate that the real prompt is still loading.
-  "[async init]: PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) ";
-}
-
 $root = $PSScriptRoot
 if (-not ($root)) {
   $root = (Join-Path $HOME 'Documents\PowerShell')
@@ -99,6 +93,28 @@ $actions += {
 
 $__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
 $actions | ForEach-Object { $__initQueue.Enqueue($_) }
+
+if (Test-Path env:VCIDEInstallDir) {
+  # We don't want to run async initialization in Visual Studio's terminal because it causes issues with 
+  # GitHub Copilot.
+
+  # Set the prompt to the posh-git prompt immediately
+  function Global:prompt {
+    # Your non-prompt logic here
+
+    # Have posh-git display its default prompt
+    & $GitPromptScriptBlock
+  }
+
+  return
+}
+
+
+# Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
+function prompt {
+  # We will override this prompt, however because it is loading async we want to communicate that the real prompt is still loading.
+  "[async init]: PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) ";
+}
 
 # Register our idle callback; use `-SupportEvent` to hide the registration from the user
 Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -SupportEvent -Action {
