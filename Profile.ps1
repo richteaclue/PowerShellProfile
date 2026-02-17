@@ -37,6 +37,13 @@ if (-not ($root)) {
 $omp = Get-Command (Join-Path $root "OhMyPosh.ps1") | Select-Object -ExpandProperty ScriptBlock
 $pgp = Get-Command (Join-Path $root "PoshGitPrompt.ps1") | Select-Object -ExpandProperty ScriptBlock
 
+$term_context = "terminal"
+if (Test-Path env:VCIDEInstallDir) {
+  $term_context = "vs"
+} elseif ( $env:TERM_PROGRAM -eq 'vscode') {
+  $term_context = "vscode"
+}
+
 $actions = @(
   {
     Import-Module posh-git -Global
@@ -94,8 +101,45 @@ $actions += {
 $__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
 $actions | ForEach-Object { $__initQueue.Enqueue($_) }
 
-if (Test-Path env:VCIDEInstallDir) {
-  # We don't want to run async initialization in Visual Studio's terminal because it causes issues with 
+switch ($term_context) {
+  "vs" {
+    $async_start = $false
+  }
+  "vscode" {
+    $async_start = $false
+  }
+  default {
+    $async_start = $true
+  }
+}
+
+if ($async_start) {
+  # Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
+  function Global:prompt {
+    # We will override this prompt, however because it is loading async we want to communicate that the real prompt is still loading.
+    "[async init]: PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) ";
+  }
+
+  # Register our idle callback; use `-SupportEvent` to hide the registration from the user
+  Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -SupportEvent -Action {
+    Write-Output "Running idle script..."
+    if ($__initQueue.Count -gt 0) {
+      & $__initQueue.Dequeue()
+    } else {
+      # NOTE: Use `-Force` when unregistering because we used `-SupportEvent` when registering
+      Unregister-Event -SubscriptionId $EventSubscriber.SubscriptionId -Force
+
+      # Remove our queue variable to avoid polluting the environment
+      Remove-Variable -Name '__initQueue' -Scope Global -Force
+
+      # Re-render the prompt so we get pretty colors ASAP!
+      [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
+    }
+  }
+
+} else {
+   
+  # We don't want to run async initialization in some terminals because it causes issues with 
   # GitHub Copilot.
 
   # Set the prompt to the posh-git prompt immediately
@@ -106,29 +150,8 @@ if (Test-Path env:VCIDEInstallDir) {
     & $GitPromptScriptBlock
   }
 
-  return
-}
-
-
-# Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
-function prompt {
-  # We will override this prompt, however because it is loading async we want to communicate that the real prompt is still loading.
-  "[async init]: PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) ";
-}
-
-# Register our idle callback; use `-SupportEvent` to hide the registration from the user
-Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -SupportEvent -Action {
-  Write-Output "Running idle script..."
-  if ($__initQueue.Count -gt 0) {
+  while ($__initQueue.Count -gt 0) {
     & $__initQueue.Dequeue()
-  } else {
-    # NOTE: Use `-Force` when unregistering because we used `-SupportEvent` when registering
-    Unregister-Event -SubscriptionId $EventSubscriber.SubscriptionId -Force
-
-    # Remove our queue variable to avoid polluting the environment
-    Remove-Variable -Name '__initQueue' -Scope Global -Force
-
-    # Re-render the prompt so we get pretty colors ASAP!
-    [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
   }
+
 }
