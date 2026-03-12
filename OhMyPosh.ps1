@@ -28,4 +28,13 @@ Set-PSReadLineOption -Colors $colors
 # Assumes posh-git module is installed & imported
 
 $env:POSH_SESSION_DEFAULT_USER = 'Rich.Tebb'
-oh-my-posh init pwsh --config '~/Documents/PowerShell/PoshThemes/GonzoDog.omp.yaml' | Invoke-Expression
+$theme_path = Join-Path $PSScriptRoot 'PoshThemes\GonzoDog.omp.yaml'
+
+if ($env:VSCODE_INJECTION) {
+  # VS Code Copilot has issues with the oh-my-posh prompt, so we use a different theme that doesn't have the same rendering issues
+  # Basically we remove the right-hand prompt and the exit code segment, which seem to be the main sources of the rendering issues
+  # in VS Code Integrated Terminal with Copilot
+  $theme_path = Join-Path $PSScriptRoot 'PoshThemes\GonzoDogCopilot.omp.yaml'
+}
+
+oh-my-posh init pwsh --config $theme_path | Invoke-Expression

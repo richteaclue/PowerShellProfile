@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+
+console_title_template: "{{.Folder}}"
+pwd: osc99
+blocks:
+- type: prompt
+  alignment: left
+  segments:
+  - style: plain
+    template: " {{ if .WSL }}WSL at {{ end }}{{.Icon}} \ue0b1"
+    foreground: "#26C6DA"
+    background: "#546E7A"
+    type: os
+  - options:
+      root_icon: 
+    style: powerline
+    template: " \uf0e7 "
+    foreground: "#26C6DA"
+    powerline_symbol: 
+    background: "#546E7A"
+    type: root
+  - options:
+      style: mixed
+    style: plain
+    template: " {{ .Path }} "
+    foreground: "#26C6DA"
+    background: "#546E7A"
+    type: path
+  - style: plain
+    template: "<#26C6DA>\ue0b1 </>{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Staging.Changed) (.Working.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0}} \uf692 {{ .StashCount }}{{ end }}{{ if gt .WorktreeCount 0}} \uf1bb {{ .WorktreeCount }}{{ end }} "
+    foreground: "#D4E157"
+    background: "#546E7A"
+    type: git
+  - style: plain
+    template: 
+    foreground: "#546E7A"
+    background: transparent
+    type: text
+- type: prompt
+  alignment: left
+  segments:
+  - options:
+      always_enabled: true
+    style: diamond
+    template: "{{ if gt .Code 0 }}✘{{ .Code }}{{ else }}✔{{ end }} ❯ "
+    foreground: "#D4E157"
+    type: status
+    foreground_templates:
+    - "{{ if gt .Code 0 }}#FF5252{{ end }}"
+  newline: true
+tooltips:
+- options:
+    source: cli
+  style: powerline
+  template: " ﴃ {{ .Name }}"
+  foreground: "#D4E157"
+  background: "#546E7A"
+  type: az
+  tips:
+  - az
+version: 3
