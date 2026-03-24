@@ -36,12 +36,12 @@ blocks:
     foreground: "#546E7A"
     background: transparent
     type: text
-- type: prompt
+- type: rprompt
   alignment: right
   segments:
-  - options:
+  - type: status
+    options:
       always_enabled: true
-    type: status
     style: diamond
     leading_diamond: 
     template: "<#193549>\ue23a</> {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔ {{ end }}<#26C6DA>\ue0b3</> "
@@ -49,38 +49,26 @@ blocks:
     background: "#546E7A"
     foreground_templates:
     - "{{ if gt .Code 0 }}#FF5252{{ end }}"
-  - options:
+  - type: executiontime
+    options:
       style: austin
       threshold: 500
-    type: executiontime
     style: diamond
     template: " <#fefefe>ﮫ</> {{ .FormattedMs }} <#26C6DA>\ue0b3</> "
     foreground: "#D4E157"
     background: "#546E7A"
-  - style: powerline
+  - type: python
+    style: powerline
     template: " {{ if .Error }}{{ .Error }}{{ else }}\ue235 {{ if .Venv }}{{ .Venv }}{{ else }}{{ .Full }}{{ end }}{{ end }} "
     foreground: "#D4E157"
     background: "#546E7A"
-    type: python
-  - options:
+  - type: dotnet
+    options:
       display_mode: files
     style: diamond
     template: "\ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }} <#26C6DA>\ue0b3</> "
     foreground: "#D4E157"
     background: "#546E7A"
-    type: dotnet
-- type: prompt
-  alignment: left
-  segments:
-  - options:
-      always_enabled: true
-    style: diamond
-    template: "{{ if gt .Code 0 }}✘{{ .Code }}{{ else }}✔{{ end }} ❯ "
-    foreground: "#D4E157"
-    type: status
-    foreground_templates:
-    - "{{ if gt .Code 0 }}#FF5252{{ end }}"
-  newline: true
 tooltips:
 - options:
     source: cli
