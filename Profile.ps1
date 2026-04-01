@@ -51,6 +51,12 @@ $actions = @(
   {
     Import-Module Microsoft.PowerShell.SecretManagement -Global
 
+    # Setup:
+    # Install-Module Microsoft.PowerShell.SecretStore -Force
+    # Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
+    # # [Optional] Disable authentication for SecretStore to avoid having to enter a password on first use
+    # Set-SecretStoreConfiguration -Authentication None
+
     # Secrets should be set with the Set-Secret command, e.g.
     # Set-Secret -Name MyStringToken
     # (will prompt for value)
