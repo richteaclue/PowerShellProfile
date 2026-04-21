@@ -6,13 +6,16 @@ The following modules need to be installed:
 
 - Microsoft.PowerShell.SecretManagement (>= 1.1.2)
 
-Also need to install [Oh My Posh](https://ohmyposh.dev/docs/installation/windows) and .
+- posh-git
+
+Also need to install [Oh My Posh](https://ohmyposh.dev/docs/installation/windows).
 
 For example:
 
 ```ps
-Install-Module PSReadline
-Install-Module Microsoft.PowerShell.SecretManagement
+Install-Module PSReadline -Force
+Install-Module Microsoft.PowerShell.SecretManagement  -Force
+Install-Module posh-git -Force
 winget install JanDeDobbeleer.OhMyPosh --force
 winget install ajeetdsouza.zoxide --force
 winget install junegunn.fzf --force

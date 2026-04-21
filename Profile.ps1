@@ -56,6 +56,7 @@ $actions = @(
     # Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
     # # [Optional] Disable authentication for SecretStore to avoid having to enter a password on first use
     # Set-SecretStoreConfiguration -Authentication None
+    # (You'll need to add a password, but then immediately enter it to enable removing it!)
 
     # Secrets should be set with the Set-Secret command, e.g.
     # Set-Secret -Name MyStringToken
@@ -77,7 +78,11 @@ $actions = @(
 )
 
 if (Test-Path env:WT_SESSION) {
+  # Windows Terminal
   $actions += {
+    # Requires installing oh-my-posh with winget: `winget install JanDeDobbeleer.OhMyPosh --source winget`
+    # Also requires installing a Nerd Font and setting it in the Windows Terminal settings, e.g. "CascadiaCove NFM"
+    # Download fonts from https://www.nerdfonts.com/font-downloads
     New-Module -ScriptBlock $omp | Import-Module -Global
   }
 } elseif ( $env:TERM_PROGRAM -eq 'vscode') {
