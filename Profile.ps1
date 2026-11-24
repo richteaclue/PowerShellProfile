@@ -3,7 +3,7 @@ Common profile for all terminal environments.
 #>
 
 ###############################################################################
-# NOTE: for performance reasons, this profile uses async initialization. This
+# NOTE: for performance reasons, some environments use async initialization. This
 # means that a dummy prompt will be displayed before all modules are loaded, and
 # then gets updated after all modules are loaded. This is done to make the
 # terminal responsive as soon as possible. The async initialization is done by
@@ -11,6 +11,72 @@ Common profile for all terminal environments.
 # https://www.kotsenas.com/posts/pwsh-profiling-async-startup for more
 # information.
 ###############################################################################
+
+function Get-ProfileEnvironment {
+  param(
+    [string]$HostName = $Host.Name,
+    [string]$TermProgram = $env:TERM_PROGRAM,
+    [string]$WindowsTerminalSession = $env:WT_SESSION,
+    [string]$VisualStudioInstallDir = $env:VCIDEInstallDir
+  )
+
+  if ($HostName -eq 'Package Manager Host') {
+    return 'nuget'
+  }
+  if ($HostName -eq 'Visual Studio Code Host') {
+    return 'vscode-powershell'
+  }
+  if ($TermProgram -eq 'vscode') {
+    return 'vscode-terminal'
+  }
+  if ($WindowsTerminalSession) {
+    return 'windows-terminal'
+  }
+  if ($VisualStudioInstallDir) {
+    return 'visual-studio-developer'
+  }
+  return 'console'
+}
+
+$profilePolicies = @{
+  'windows-terminal' = @{
+    Prompt = 'oh-my-posh'
+    Theme = 'GonzoDog.omp.yaml'
+    Async = $true
+  }
+  'vscode-terminal' = @{
+    Prompt = 'oh-my-posh'
+    Theme = 'GonzoDogCopilot.omp.yaml'
+    Async = $false
+  }
+  'vscode-powershell' = @{
+    Prompt = 'posh-git'
+    Async = $false
+  }
+  'visual-studio-developer' = @{
+    Prompt = 'posh-git'
+    Async = $false
+  }
+  'nuget' = @{
+    Prompt = 'none'
+    Async = $false
+  }
+  'default' = @{
+    Prompt = 'posh-git'
+    Async = $true
+  }
+}
+
+$profileEnvironment = Get-ProfileEnvironment
+$profilePolicy = if ($profilePolicies.ContainsKey($profileEnvironment)) {
+  $profilePolicies[$profileEnvironment]
+} else {
+  $profilePolicies['default']
+}
+
+if ($profilePolicy.Prompt -eq 'none') {
+  return
+}
 
 # Path modifications
 
@@ -37,13 +103,6 @@ if (-not ($root)) {
 $omp = Get-Command (Join-Path $root "OhMyPosh.ps1") | Select-Object -ExpandProperty ScriptBlock
 $pgp = Get-Command (Join-Path $root "PoshGitPrompt.ps1") | Select-Object -ExpandProperty ScriptBlock
 
-$term_context = "terminal"
-if (Test-Path env:VCIDEInstallDir) {
-  $term_context = "vs"
-} elseif ( $env:TERM_PROGRAM -eq 'vscode') {
-  $term_context = "vscode"
-}
-
 $actions = @(
   {
     Import-Module posh-git -Global
@@ -69,17 +128,14 @@ $actions = @(
   }
 )
 
-if (Test-Path env:WT_SESSION) {
-  # Windows Terminal
+if ($profilePolicy.Prompt -eq 'oh-my-posh') {
   $actions += {
     # Requires installing oh-my-posh with winget: `winget install JanDeDobbeleer.OhMyPosh --source winget`
     # Also requires installing a Nerd Font and setting it in the Windows Terminal settings, e.g. "CascadiaCove NFM"
     # Download fonts from https://www.nerdfonts.com/font-downloads
-    New-Module -ScriptBlock $omp | Import-Module -Global
+    New-Module -ScriptBlock $omp -ArgumentList $profilePolicy.Theme | Import-Module -Global
   }
-} elseif ( $env:TERM_PROGRAM -eq 'vscode') {
-  # VS Code
-  # Currently a rendering issue in VSCode Integrated Host with oh-my-posh, so we use Posh-Git prompt
+} elseif ($profilePolicy.Prompt -eq 'posh-git') {
   $actions += $pgp
   $actions += {
     function Global:prompt {
@@ -90,15 +146,7 @@ if (Test-Path env:WT_SESSION) {
     }
   }
 } else {
-  $actions += $pgp
-  $actions += {
-    function Global:prompt {
-      # Your non-prompt logic here
-  
-      # Have posh-git display its default prompt
-      & $GitPromptScriptBlock
-    }
-  }
+  throw "Unsupported prompt mechanism '$($profilePolicy.Prompt)' for environment '$profileEnvironment'."
 }
 
 $actions += {
@@ -109,17 +157,7 @@ $actions += {
 $__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
 $actions | ForEach-Object { $__initQueue.Enqueue($_) }
 
-switch ($term_context) {
-  "vs" {
-    $async_start = $false
-  }
-  "vscode" {
-    $async_start = $false
-  }
-  default {
-    $async_start = $true
-  }
-}
+$async_start = $profilePolicy.Async
 
 if ($async_start) {
   # Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
