@@ -66,14 +66,6 @@ $actions = @(
 
     # Secrets for Azure / Terraform
     #$env:ARM_CLIENT_SECRET = (Get-Secret -Name 'ARM_CLIENT_SECRET' -AsPlainText -ErrorAction Continue)
-  },
-  {
-    # See https://github.com/devblackops/Terminal-Icons/issues/126
-    $terminalIconsFolder = "$env:APPDATA\powershell\Community\Terminal-Icons"
-    if (Test-Path $terminalIconsFolder){
-        Remove-Item $terminalIconsFolder -Recurse
-    }
-    Import-Module -Name Terminal-Icons -Global
   }
 )
 
