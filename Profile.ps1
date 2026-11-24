@@ -2,16 +2,6 @@
 Common profile for all terminal environments.
 #>
 
-###############################################################################
-# NOTE: for performance reasons, some environments use async initialization. This
-# means that a dummy prompt will be displayed before all modules are loaded, and
-# then gets updated after all modules are loaded. This is done to make the
-# terminal responsive as soon as possible. The async initialization is done by
-# registering an idle event that runs the initialization script. See
-# https://www.kotsenas.com/posts/pwsh-profiling-async-startup for more
-# information.
-###############################################################################
-
 function Get-ProfileEnvironment {
   param(
     [string]$HostName = $Host.Name,
@@ -42,28 +32,22 @@ $profilePolicies = @{
   'windows-terminal' = @{
     Prompt = 'oh-my-posh'
     Theme = 'GonzoDog.omp.yaml'
-    Async = $true
   }
   'vscode-terminal' = @{
     Prompt = 'oh-my-posh'
     Theme = 'GonzoDogCopilot.omp.yaml'
-    Async = $false
   }
   'vscode-powershell' = @{
     Prompt = 'posh-git'
-    Async = $false
   }
   'visual-studio-developer' = @{
     Prompt = 'posh-git'
-    Async = $false
   }
   'nuget' = @{
     Prompt = 'none'
-    Async = $false
   }
   'default' = @{
     Prompt = 'posh-git'
-    Async = $true
   }
 }
 
@@ -100,104 +84,28 @@ if (-not ($root)) {
 . (Join-Path $root "Utilities.ps1")
 . (Join-Path $root "Alias.ps1")
 
-$omp = Get-Command (Join-Path $root "OhMyPosh.ps1") | Select-Object -ExpandProperty ScriptBlock
-$pgp = Get-Command (Join-Path $root "PoshGitPrompt.ps1") | Select-Object -ExpandProperty ScriptBlock
-
-$actions = @(
-  {
-    Import-Module posh-git -Global
-  },
-  {
-    Import-Module Microsoft.PowerShell.SecretManagement -Global
-
-    # Setup:
-    # Install-Module Microsoft.PowerShell.SecretStore -Force
-    # Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
-    # # [Optional] Disable authentication for SecretStore to avoid having to enter a password on first use
-    # Set-SecretStoreConfiguration -Authentication None
-    # (You'll need to add a password, but then immediately enter it to enable removing it!)
-
-    # Secrets should be set with the Set-Secret command, e.g.
-    # Set-Secret -Name MyStringToken
-    # (will prompt for value)
-
-    #$env:AZP_AGENT_TOKEN = (Get-Secret -Name 'AZP_AGENT_TOKEN' -AsPlainText -ErrorAction Continue)
-
-    # Secrets for Azure / Terraform
-    #$env:ARM_CLIENT_SECRET = (Get-Secret -Name 'ARM_CLIENT_SECRET' -AsPlainText -ErrorAction Continue)
-  }
-)
-
 if ($profilePolicy.Prompt -eq 'oh-my-posh') {
-  $actions += {
-    # Requires installing oh-my-posh with winget: `winget install JanDeDobbeleer.OhMyPosh --source winget`
-    # Also requires installing a Nerd Font and setting it in the Windows Terminal settings, e.g. "CascadiaCove NFM"
-    # Download fonts from https://www.nerdfonts.com/font-downloads
-    New-Module -ScriptBlock $omp -ArgumentList $profilePolicy.Theme | Import-Module -Global
-  }
+  # Requires installing oh-my-posh with winget: `winget install JanDeDobbeleer.OhMyPosh --source winget`
+  # Also requires installing a Nerd Font and setting it in the Windows Terminal settings, e.g. "CascadiaCove NFM"
+  # Download fonts from https://www.nerdfonts.com/font-downloads
+  $omp = Get-Command (Join-Path $root "OhMyPosh.ps1") | Select-Object -ExpandProperty ScriptBlock
+  New-Module -ScriptBlock $omp -ArgumentList $profilePolicy.Theme -ErrorAction Stop |
+    Import-Module -Global -ErrorAction Stop
 } elseif ($profilePolicy.Prompt -eq 'posh-git') {
-  $actions += $pgp
-  $actions += {
-    function Global:prompt {
-      # Your non-prompt logic here
-  
-      # Have posh-git display its default prompt
-      & $GitPromptScriptBlock
-    }
+  Import-Module posh-git -Global -ErrorAction Stop
+  . (Join-Path $root "PoshGitPrompt.ps1")
+  function Global:prompt {
+    & $GitPromptScriptBlock
   }
 } else {
   throw "Unsupported prompt mechanism '$($profilePolicy.Prompt)' for environment '$profileEnvironment'."
 }
 
-$actions += {
-  # Dependency: https://github.com/ajeetdsouza/zoxide
-  New-Module -ScriptBlock { Invoke-Expression (& { (zoxide init powershell | Out-String) }) } | Import-Module -Global
+# Reinstall zoxide's prompt hook when reloading the profile after changing the prompt.
+# Dependency: https://github.com/ajeetdsouza/zoxide
+$zoxideInit = zoxide init powershell
+if ($LASTEXITCODE -ne 0 -or -not $zoxideInit) {
+  throw "zoxide initialization failed (exit code $LASTEXITCODE)."
 }
-
-$__initQueue = [System.Collections.Queue](New-Object System.Collections.Queue)
-$actions | ForEach-Object { $__initQueue.Enqueue($_) }
-
-$async_start = $profilePolicy.Async
-
-if ($async_start) {
-  # Async PS startup for responsiveness, see https://www.kotsenas.com/posts/pwsh-profiling-async-startup
-  function Global:prompt {
-    # We will override this prompt, however because it is loading async we want to communicate that the real prompt is still loading.
-    "[async init]: PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) ";
-  }
-
-  # Register our idle callback; use `-SupportEvent` to hide the registration from the user
-  Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -SupportEvent -Action {
-    Write-Output "Running idle script..."
-    if ($__initQueue.Count -gt 0) {
-      & $__initQueue.Dequeue()
-    } else {
-      # NOTE: Use `-Force` when unregistering because we used `-SupportEvent` when registering
-      Unregister-Event -SubscriptionId $EventSubscriber.SubscriptionId -Force
-
-      # Remove our queue variable to avoid polluting the environment
-      Remove-Variable -Name '__initQueue' -Scope Global -Force
-
-      # Re-render the prompt so we get pretty colors ASAP!
-      [Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
-    }
-  }
-
-} else {
-   
-  # We don't want to run async initialization in some terminals because it causes issues with 
-  # GitHub Copilot.
-
-  # Set the prompt to the posh-git prompt immediately
-  function Global:prompt {
-    # Your non-prompt logic here
-
-    # Have posh-git display its default prompt
-    & $GitPromptScriptBlock
-  }
-
-  while ($__initQueue.Count -gt 0) {
-    & $__initQueue.Dequeue()
-  }
-
-}
+$global:__zoxide_hooked = 0
+Invoke-Expression ($zoxideInit | Out-String)

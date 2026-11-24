@@ -107,3 +107,24 @@ function Start-JMeter {
     Start-Process $jmeter -WindowStyle Hidden -ArgumentList @('-j', $jmeterlog)
 }
 Set-Alias jmeter Start-JMeter -Description 'Starts JMeter'
+
+function Start-SecretManagement {
+    Import-Module Microsoft.PowerShell.SecretManagement -Global
+
+    # Setup:
+    # Install-Module Microsoft.PowerShell.SecretStore -Force
+    # Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
+    # # [Optional] Disable authentication for SecretStore to avoid having to enter a password on first use
+    # Set-SecretStoreConfiguration -Authentication None
+    # (You'll need to add a password, but then immediately enter it to enable removing it!)
+
+    # Secrets should be set with the Set-Secret command, e.g.
+    # Set-Secret -Name MyStringToken
+    # (will prompt for value)
+
+    #$env:AZP_AGENT_TOKEN = (Get-Secret -Name 'AZP_AGENT_TOKEN' -AsPlainText -ErrorAction Continue)
+
+    # Secrets for Azure / Terraform
+    #$env:ARM_CLIENT_SECRET = (Get-Secret -Name 'ARM_CLIENT_SECRET' -AsPlainText -ErrorAction Continue)
+  }
+  

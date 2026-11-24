@@ -29,9 +29,11 @@ $colors = @{
 
 Set-PSReadLineOption -Colors $colors
 
-# Assumes posh-git module is installed & imported
-
 $env:POSH_SESSION_DEFAULT_USER = 'Rich.Tebb'
 $theme_path = Join-Path $PSScriptRoot "PoshThemes\$Theme"
 
-oh-my-posh init pwsh --config $theme_path | Invoke-Expression
+$ompInit = oh-my-posh init pwsh --config $theme_path
+if ($LASTEXITCODE -ne 0 -or -not $ompInit) {
+  throw "Oh My Posh initialization failed (exit code $LASTEXITCODE)."
+}
+Invoke-Expression ($ompInit | Out-String)

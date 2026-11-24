@@ -3,17 +3,16 @@
 ## Environment policies
 
 [Profile.ps1](Profile.ps1) defines `Get-ProfileEnvironment` and a
-`$profilePolicies` table controlling the prompt, Oh My Posh theme, and async
-initialization:
+`$profilePolicies` table controlling the prompt and Oh My Posh theme:
 
-| Environment ID | Detection | Prompt | Initialization |
-| --- | --- | --- | --- |
-| `nuget` | Host name `Package Manager Host` | Preserve the host prompt; skip terminal setup | None |
-| `vscode-powershell` | Host name `Visual Studio Code Host` | posh-git | Synchronous |
-| `vscode-terminal` | `TERM_PROGRAM` is `vscode` | Oh My Posh, simplified theme | Synchronous |
-| `windows-terminal` | Nonempty `WT_SESSION` | Oh My Posh, full theme | Async |
-| `visual-studio-developer` | Nonempty `VCIDEInstallDir`, without a match above | posh-git | Synchronous |
-| `console` / unlisted IDs | Fallback policy (`default`) | posh-git | Async |
+| Environment ID | Detection | Prompt |
+| --- | --- | --- |
+| `nuget` | Host name `Package Manager Host` | Preserve the host prompt; skip terminal setup |
+| `vscode-powershell` | Host name `Visual Studio Code Host` | posh-git |
+| `vscode-terminal` | `TERM_PROGRAM` is `vscode` | Oh My Posh, simplified theme |
+| `windows-terminal` | Nonempty `WT_SESSION` | Oh My Posh, full theme |
+| `visual-studio-developer` | Nonempty `VCIDEInstallDir`, without a match above | posh-git |
+| `console` / unlisted IDs | Fallback policy (`default`) | posh-git |
 
 Detection follows the table's order. In particular, inherited `WT_SESSION`
 cannot override a VS Code host or terminal. `VCIDEInstallDir` is a developer
@@ -25,8 +24,19 @@ to adjust behavior. The OMP theme is selected explicitly by the policy, not by
 `VSCODE_INJECTION`. Zoxide initializes after the selected prompt so its
 directory-learning hook wraps that prompt.
 
+Terminal setup is synchronous: the full prompt and `z` are initialized before
+the first usable prompt, rather than switching from a placeholder later.
+SecretManagement is loaded on demand by PowerShell's module autoloading.
+posh-git is loaded only for its prompt; Git completions from posh-git are not
+available automatically in Oh My Posh environments. Import it explicitly with
+`Import-Module posh-git` if needed.
+
 These policies apply when this common profile is loaded. They do not install or
 restore the separate Windows PowerShell 5.1 profiles.
+
+To use SecretManagement, install SecretStore and register a vault as described
+in the [SecretManagement documentation](https://learn.microsoft.com/en-us/powershell/utility-modules/secretmanagement/overview).
+Secrets can then be added with `Set-Secret` and retrieved with `Get-Secret`.
 
 ## Installation
 
