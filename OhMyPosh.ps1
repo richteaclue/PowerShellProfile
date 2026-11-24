@@ -8,23 +8,24 @@ param(
   [string]$Theme = 'GonzoDog.omp.yaml'
 )
 
+$esc = [char]0x1b
 $colors = @{
-    Command = "`e[93m"
-    Comment = "`e[32m"
-    ContinuationPrompt = "`e[37m"
-    Emphasis = "`e[96m"
-    Error = "`e[91m"
-    Keyword = "`e[92m"
-    Member = "`e[97m"
-    Number = "`e[97m"
-    Operator = "`e[74m"
-    Parameter = "`e[74m"
-    #Prediction = "`e[38;5;238m"
-    Selection = "`e[30;47m"
-    String  = "$([char]0x1b)[38;5;100m"
-    Type = "`e[37m"
-    Variable = "`e[92m"
-    Default = "`e[37m"
+    Command = "${esc}[93m"
+    Comment = "${esc}[32m"
+    ContinuationPrompt = "${esc}[37m"
+    Emphasis = "${esc}[96m"
+    Error = "${esc}[91m"
+    Keyword = "${esc}[92m"
+    Member = "${esc}[97m"
+    Number = "${esc}[97m"
+    Operator = "${esc}[74m"
+    Parameter = "${esc}[74m"
+    #Prediction = "${esc}[38;5;238m"
+    Selection = "${esc}[30;47m"
+    String  = "${esc}[38;5;100m"
+    Type = "${esc}[37m"
+    Variable = "${esc}[92m"
+    Default = "${esc}[37m"
 }
 
 Set-PSReadLineOption -Colors $colors

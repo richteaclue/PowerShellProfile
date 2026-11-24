@@ -83,6 +83,30 @@ Describe 'Profile environment detection' {
     }
 }
 
+Describe 'Windows PowerShell prompt colors' {
+    It 'initializes Oh My Posh colors in Windows PowerShell 5.1' {
+        $child = @'
+$ErrorActionPreference = 'Stop'
+. (Join-Path $env:PROFILE_TEST_ROOT 'OhMyPosh.ps1')
+if ((Get-PSReadLineOption).CommandColor -ne "$([char]27)[93m") {
+    throw 'PSReadLine did not retain the expected command color'
+}
+if (-not (Get-Module oh-my-posh-core)) { throw 'Oh My Posh did not initialize' }
+'@
+        $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($child))
+        $oldRoot = $env:PROFILE_TEST_ROOT
+        try {
+            $env:PROFILE_TEST_ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+            $exe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+            $output = & $exe -NoLogo -NoProfile -EncodedCommand $encoded 2>&1
+            if ($LASTEXITCODE -ne 0) { throw ($output | Out-String) }
+        }
+        finally {
+            $env:PROFILE_TEST_ROOT = $oldRoot
+        }
+    }
+}
+
 Describe 'Synchronous profile initialization' {
     $startupCases = @(
         @{ Name = 'Windows Terminal'; Environment = 'windows-terminal'; Prompt = 'omp' },
