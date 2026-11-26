@@ -26,6 +26,9 @@ directory-learning hook wraps that prompt.
 
 Terminal setup is synchronous: the full prompt and `z` are initialized before
 the first usable prompt, rather than switching from a placeholder later.
+Oh My Posh initialization uses `--print --eval` to evaluate the full script
+in memory, avoiding shared initialization-script file locks when several tabs
+start together.
 SecretManagement is loaded on demand by PowerShell's module autoloading.
 posh-git is loaded only for its prompt; Git completions from posh-git are not
 available automatically in Oh My Posh environments. Import it explicitly with

@@ -33,7 +33,8 @@ Set-PSReadLineOption -Colors $colors
 $env:POSH_SESSION_DEFAULT_USER = 'Rich.Tebb'
 $theme_path = Join-Path $PSScriptRoot "PoshThemes\$Theme"
 
-$ompInit = oh-my-posh init pwsh --config $theme_path
+# Inline initialization avoids shared init-script file locks during simultaneous startups.
+$ompInit = oh-my-posh init pwsh --config $theme_path --print --eval
 if ($LASTEXITCODE -ne 0 -or -not $ompInit) {
   throw "Oh My Posh initialization failed (exit code $LASTEXITCODE)."
 }

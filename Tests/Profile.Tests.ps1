@@ -107,6 +107,44 @@ if (-not (Get-Module oh-my-posh-core)) { throw 'Oh My Posh did not initialize' }
     }
 }
 
+Describe 'Oh My Posh inline initialization' {
+    It 'does not source a shared initialization file in <Shell>' -TestCases @(
+        @{ Shell = 'PowerShell 7'; Executable = (Join-Path $PSHOME 'pwsh.exe') },
+        @{
+            Shell = 'Windows PowerShell 5.1'
+            Executable = (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe')
+        }
+    ) {
+        param($Shell, $Executable)
+
+        $child = @'
+$ErrorActionPreference = 'Stop'
+$ompExecutable = (Get-Command oh-my-posh -CommandType Application).Source
+function global:oh-my-posh {
+    $scriptText = & $ompExecutable @args
+    if ($LASTEXITCODE -ne 0) { throw 'Oh My Posh failed' }
+    if (($scriptText -join "`n") -match "&\s*'[^'\r\n]*init\.[^'\r\n]*\.ps1'") {
+        throw 'Initialization still sources a shared file'
+    }
+    $scriptText
+}
+. (Join-Path $env:PROFILE_TEST_ROOT 'OhMyPosh.ps1')
+if (-not (Get-Module oh-my-posh-core)) { throw 'Oh My Posh did not initialize' }
+$null = prompt
+'@
+        $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($child))
+        $oldRoot = $env:PROFILE_TEST_ROOT
+        try {
+            $env:PROFILE_TEST_ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+            $output = & $Executable -NoLogo -NoProfile -EncodedCommand $encoded 2>&1
+            if ($LASTEXITCODE -ne 0) { throw ($output | Out-String) }
+        }
+        finally {
+            $env:PROFILE_TEST_ROOT = $oldRoot
+        }
+    }
+}
+
 Describe 'Synchronous profile initialization' {
     $startupCases = @(
         @{ Name = 'Windows Terminal'; Environment = 'windows-terminal'; Prompt = 'omp' },
